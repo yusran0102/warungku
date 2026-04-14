@@ -1,0 +1,562 @@
+<!-- Sales page – mirrors admin/sales-customers/sales/page.tsx -->
+<div>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-bold text-gray-800">Penjualan</h1>
+    <button data-modal-open="new-sale-modal"
+      class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Penjualan Baru
+    </button>
+  </div>
+
+  <!-- Sales table -->
+  <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+    <div class="overflow-x-auto overflow-y-auto max-h-[480px]">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b sticky top-0 z-10">
+          <tr>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">No. Penjualan</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Pelanggan</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Total</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Metode</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Status</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Tanggal</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="sales-tbody" class="divide-y">
+          {{range .Sales}}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 font-mono text-xs font-medium text-teal-600 whitespace-nowrap">{{.SaleNumber}}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              {{if .Customer}}{{.Customer.Name}}
+              {{else if .NonMemberCustomer}}{{.NonMemberCustomer.Name}} <span class="text-xs text-gray-400">(umum)</span>
+              {{else}}<span class="text-gray-400">-</span>{{end}}
+            </td>
+            <td class="px-4 py-3 font-medium whitespace-nowrap">{{formatRupiah .Total}}</td>
+            <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{.PaymentMethod}}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded-full text-xs
+                {{if eq (str .PaymentStatus) "PAID"}}bg-green-100 text-green-700
+                {{else if eq (str .PaymentStatus) "PENDING"}}bg-yellow-100 text-yellow-700
+                {{else}}bg-red-100 text-red-700{{end}}">
+                {{.PaymentStatus}}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{{.CreatedAt.Format "02 Jan 2006"}}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <button type="button"
+                data-id="{{.ID}}"
+                data-sale-number="{{.SaleNumber}}"
+                data-payment-method="{{.PaymentMethod}}"
+                data-payment-status="{{str .PaymentStatus}}"
+                data-notes="{{if .Notes}}{{deref .Notes}}{{end}}"
+                data-discount='{{printf "%.0f" .Discount}}'
+                data-tax='{{printf "%.0f" .Tax}}'
+                data-ongkir='{{printf "%.0f" .Ongkir}}'
+                data-items='[{{range $i,$it := .Items}}{{if $i}},{{end}}{"variantId":"{{$it.VariantID}}","quantity":{{$it.Quantity}},"price":{{$it.Price}}}{{end}}]'
+                onclick="openEditSaleFromBtn(this)"
+                class="text-teal-600 hover:text-teal-800 text-xs font-medium px-2 py-1 rounded hover:bg-teal-50 transition">
+                Edit
+              </button>
+            </td>
+          </tr>
+          {{else}}
+          <tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Belum ada data penjualan</td></tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    <div id="sales-pagination"></div>
+  </div>
+</div>
+
+<!-- Edit Sale Modal -->
+<div id="edit-sale-modal" class="wk-modal-overlay" style="display:none">
+  <div class="wk-modal-box max-w-md w-full mx-auto m-4">
+    <div class="wk-modal-header">
+      <div>
+        <h3 class="wk-modal-title">Edit Penjualan</h3>
+        <p class="text-xs text-gray-400 mt-0.5" id="edit-sale-number"></p>
+      </div>
+      <button class="wk-modal-close p-2" data-modal-close="edit-sale-modal">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="wk-modal-body p-4 md:p-6">
+      <form id="edit-sale-form" action="" method="POST" class="space-y-4">
+
+        <!-- Items section -->
+        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+          <div class="flex items-center justify-between mb-3">
+            <label class="text-sm font-bold text-gray-700">Produk</label>
+            <button type="button" onclick="addEditItem()"
+              class="text-xs bg-teal-50 text-teal-700 px-3 py-1.5 rounded-lg hover:bg-teal-100 font-semibold transition">
+              + Tambah Produk
+            </button>
+          </div>
+          <div id="es-items" class="space-y-3"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Metode Bayar</label>
+            <select name="paymentMethod" id="es-method"
+              class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400">
+              <option value="CASH">💵 Tunai</option>
+              <option value="TRANSFER">🏦 Transfer</option>
+              <option value="QRIS">📱 QRIS</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Status</label>
+            <select name="paymentStatus" id="es-status"
+              class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400">
+              <option value="PAID">Lunas</option>
+              <option value="PENDING">Pending</option>
+              <option value="UNPAID">Belum Bayar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Diskon (Rp)</label>
+            <input type="number" name="discount" id="es-discount" value="0" min="0"
+              class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pajak (Rp)</label>
+            <input type="number" name="tax" id="es-tax" value="0" min="0"
+              class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Ongkir (Rp)</label>
+            <input type="number" name="ongkir" id="es-ongkir" value="0" min="0"
+              class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Catatan</label>
+          <textarea name="notes" id="es-notes" rows="2" placeholder="Catatan tambahan..."
+            class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400"></textarea>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="submit"
+            class="flex-1 bg-teal-600 hover:bg-teal-500 text-white py-2.5 rounded-xl font-medium transition">
+            Simpan Perubahan
+          </button>
+          <button type="button" data-modal-close="edit-sale-modal"
+            class="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl font-medium hover:bg-gray-50 transition">
+            Batal
+          </button>
+        </div>
+      </form>
+
+      <!-- Hapus inside modal -->
+      <div class="mt-3 pt-3 border-t border-gray-100">
+        <form id="delete-sale-form" action="" method="POST"
+          data-confirm="Hapus penjualan ini? Tindakan ini tidak bisa dibatalkan.">
+          <button type="submit"
+            class="w-full text-red-500 hover:bg-red-50 border border-red-200 py-2 rounded-xl text-sm font-medium transition">
+            Hapus Penjualan
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Sale Modal -->
+<div id="new-sale-modal" class="wk-modal-overlay wk-modal-scroll" style="display:none">
+  <div class="wk-modal-box max-w-2xl w-full mx-auto m-4"> <div class="wk-modal-header sticky top-0 bg-white z-20 border-b">
+      <h3 class="wk-modal-title">Penjualan Baru</h3>
+      <button class="wk-modal-close p-2" data-modal-close="new-sale-modal">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="wk-modal-body p-4 md:p-6">
+      <form action="/admin/sales-customers/sales" method="POST" id="sale-form" class="space-y-6">
+
+        <div class="bg-gray-50 p-3 md:p-4 rounded-xl border border-gray-100">
+          <div class="flex items-center justify-between mb-3">
+            <label class="text-sm font-bold text-gray-700">Produk Terpilih</label>
+            <button type="button" onclick="addItem()" class="text-xs bg-teal-50 text-teal-700 px-3 py-1.5 rounded-lg hover:bg-teal-100 font-semibold transition">
+              + Tambah Produk
+            </button>
+          </div>
+          
+          <div id="sale-items" class="space-y-3">
+            <div class="sale-item-row bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative">
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                <div class="md:col-span-7">
+                  <select name="items[0][variantId]" onchange="updatePrice(this, 0)"
+                    class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 focus:outline-none">
+                    <option value="">-- Pilih produk --</option>
+                    {{range .Variants}}
+                    <option value="{{.ID}}" data-price="{{.Price}}" data-name="{{.Product.Name}} - {{.Name}}">
+                      {{.Product.Name}} – {{.Name}} ({{formatRupiah .Price}})
+                    </option>
+                    {{end}}
+                  </select>
+                </div>
+                <div class="md:col-span-5 flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400">Qty:</span>
+                    <input type="number" name="items[0][quantity]" value="1" min="1" oninput="updatePrice(this.closest('.sale-item-row').querySelector('select'), 0)"
+                      class="w-16 border-gray-300 rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-teal-400 focus:outline-none" />
+                  </div>
+                  <div class="text-right">
+                    <input type="hidden" name="items[0][price]" value="" />
+                    <span class="text-sm font-bold text-teal-600 subtotal-display">Rp 0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Pelanggan</label>
+          <!-- Hidden fields that get populated by the custom searchable dropdown -->
+          <input type="hidden" name="customerId" id="sel-member-id" value="" />
+          <input type="hidden" name="nonMemberCustomerId" id="sel-nonmember-id" value="" />
+
+          <!-- Searchable dropdown wrapper -->
+          <div class="relative" id="customer-dropdown-wrap">
+            <div class="flex items-center border border-gray-300 rounded-lg bg-white focus-within:ring-2 focus-within:ring-teal-400 focus-within:border-transparent overflow-hidden">
+              <input type="text" id="customer-search" placeholder="Cari nama pelanggan..." autocomplete="off"
+                class="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-transparent"
+                oninput="filterCustomers(this.value)" onfocus="openCustomerDropdown()" />
+              <button type="button" onclick="clearCustomerSelection()" id="customer-clear-btn"
+                class="hidden px-2 text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <!-- Dropdown list -->
+            <div id="customer-list"
+              class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+              <div class="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b bg-gray-50">Member</div>
+              {{range .Members}}
+              <div class="customer-option px-3 py-2 cursor-pointer hover:bg-teal-50 text-sm flex items-center justify-between gap-2"
+                data-id="{{.ID}}" data-type="member" data-name="{{.Name}}"
+                onclick="selectCustomer('{{.ID}}','member','{{.Name}} ({{.Points}} pts)')">
+                <span>{{.Name}}</span>
+                <span class="text-xs text-teal-600 font-medium shrink-0">{{.Points}} pts</span>
+              </div>
+              {{else}}
+              <div class="px-3 py-2 text-sm text-gray-400 italic">Belum ada member</div>
+              {{end}}
+              <div class="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider border-t border-b bg-gray-50">Pelanggan Umum</div>
+              {{range .NonMembers}}
+              <div class="customer-option px-3 py-2 cursor-pointer hover:bg-teal-50 text-sm flex items-center justify-between gap-2"
+                data-id="{{.ID}}" data-type="nonmember" data-name="{{.Name}}"
+                onclick="selectCustomer('{{.ID}}','nonmember','{{.Name}}')">
+                <span>{{.Name}}</span>
+                <span class="text-xs text-gray-400 shrink-0">Umum</span>
+              </div>
+              {{else}}
+              <div class="px-3 py-2 text-sm text-gray-400 italic">Belum ada pelanggan umum</div>
+              {{end}}
+              <div class="px-3 py-2 cursor-pointer hover:bg-gray-50 text-sm text-gray-400 italic border-t"
+                onclick="selectCustomer('','none','— Tanpa pelanggan —')">
+                — Tanpa pelanggan —
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 p-4 bg-teal-50/50 rounded-xl border border-teal-100">
+          <div>
+            <label class="block text-xs font-bold text-teal-700 uppercase mb-1">Metode</label>
+            <select name="paymentMethod" class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400">
+              <option value="CASH">💵 Tunai</option>
+              <option value="TRANSFER">🏦 Transfer</option>
+              <option value="QRIS">📱 QRIS</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-teal-700 uppercase mb-1">Status</label>
+            <select name="paymentStatus" class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400">
+              <option value="PAID">Lunas</option>
+              <option value="PENDING">Pending</option>
+              <option value="UNPAID">Belum Bayar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Diskon (Rp)</label>
+            <input type="number" name="discount" value="0" class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pajak (Rp)</label>
+            <input type="number" name="tax" value="0" class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Ongkir (Rp)</label>
+            <input type="number" name="ongkir" value="0" class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Catatan</label>
+          <textarea name="notes" rows="2" placeholder="Catatan tambahan..."
+            class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400"></textarea>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-3 pt-4 border-t sticky bottom-0 bg-white pb-2">
+          <button type="submit"
+            class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-teal-200 transition-all">
+            Simpan Penjualan
+          </button>
+          <button type="button" data-modal-close="new-sale-modal"
+            class="flex-1 border border-gray-200 text-gray-500 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+            Batal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Pagination ──────────────────────────────────────────────────────────────
+var _pg = {};
+function paginate(tbodyId, pgId, size) {
+  var tbody = document.getElementById(tbodyId);
+  var pgEl = document.getElementById(pgId);
+  if (!tbody) return;
+  var rows = Array.from(tbody.querySelectorAll('tr')).filter(function(r){ return !r.querySelector('td[colspan]'); });
+  _pg[tbodyId] = { rows: rows, page: 1, size: size || 10, el: pgEl };
+  _renderPg(tbodyId);
+}
+function _goPage(id, p) { _pg[id].page = p; _renderPg(id); }
+function _renderPg(id) {
+  var s = _pg[id]; var total = Math.ceil(s.rows.length / s.size);
+  s.rows.forEach(function(r,i){ r.style.display = (i>=(s.page-1)*s.size && i<s.page*s.size)?'':'none'; });
+  if (!s.el) return;
+  if (s.rows.length === 0) { s.el.innerHTML=''; return; }
+  var from=(s.page-1)*s.size+1, to=Math.min(s.page*s.size,s.rows.length);
+  var h='<div class="flex items-center justify-between px-4 py-3 border-t text-xs text-gray-500">';
+  h+='<span>'+from+'–'+to+' dari '+s.rows.length+' data</span><div class="flex gap-1">';
+  if(s.page>1) h+='<button onclick="_goPage(\''+id+'\','+(s.page-1)+')" class="px-2.5 py-1 rounded border hover:bg-gray-50">‹</button>';
+  var st=Math.max(1,s.page-2), en=Math.min(total,st+4);
+  for(var p=st;p<=en;p++){
+    var a=p===s.page?'bg-teal-600 text-white border-teal-600':'hover:bg-gray-50 text-gray-600';
+    h+='<button onclick="_goPage(\''+id+'\','+p+')" class="px-2.5 py-1 rounded border '+a+'">'+p+'</button>';
+  }
+  if(s.page<total) h+='<button onclick="_goPage(\''+id+'\','+(s.page+1)+')" class="px-2.5 py-1 rounded border hover:bg-gray-50">›</button>';
+  h+='</div></div>';
+  s.el.innerHTML=h;
+}
+document.addEventListener('DOMContentLoaded', function() {
+  paginate('sales-tbody', 'sales-pagination', 10);
+});
+
+// ── Edit Sale modal ──────────────────────────────────────────────────────────
+var esItemCount = 0;
+
+function openEditSaleFromBtn(btn) {
+  var items = [];
+  try { items = JSON.parse(btn.dataset.items || '[]'); } catch(e) {}
+  openEditSale(btn.dataset.id, btn.dataset.saleNumber, btn.dataset.paymentMethod,
+    btn.dataset.paymentStatus, btn.dataset.notes, btn.dataset.discount,
+    btn.dataset.tax, btn.dataset.ongkir, items);
+}
+function openEditSale(id, saleNumber, method, status, notes, discount, tax, ongkir, items) {
+  document.getElementById('edit-sale-form').action =
+    '/admin/sales-customers/sales/' + id + '/update';
+  document.getElementById('delete-sale-form').action =
+    '/admin/sales-customers/sales/' + id + '/delete';
+  document.getElementById('edit-sale-number').textContent = saleNumber;
+  document.getElementById('es-method').value = method;
+  document.getElementById('es-status').value = status;
+  document.getElementById('es-notes').value = notes;
+  document.getElementById('es-discount').value = discount;
+  document.getElementById('es-tax').value = tax;
+  document.getElementById('es-ongkir').value = ongkir;
+
+  // Populate items
+  esItemCount = 0;
+  var container = document.getElementById('es-items');
+  container.innerHTML = '';
+  var itemList = items || [];
+  if (itemList.length === 0) { addEditItem(); }
+  else { itemList.forEach(function(it) { addEditItem(it.variantId, it.quantity, it.price); }); }
+
+  openModal('edit-sale-modal');
+}
+
+function getVariantOptionsHtml() {
+  var src = document.querySelector('[name="items[0][variantId]"]');
+  return src ? src.innerHTML : '<option value="">-- Pilih produk --</option>';
+}
+
+function addEditItem(presetVariantId, presetQty, presetPrice) {
+  var container = document.getElementById('es-items');
+  var idx = esItemCount++;
+  var optHtml = getVariantOptionsHtml();
+  var div = document.createElement('div');
+  div.className = 'es-item-row bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative';
+  div.innerHTML =
+    '<button type="button" onclick="this.closest(\'.es-item-row\').remove()" ' +
+      'class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md hover:bg-red-600 z-10">' +
+      '<span class="text-xs">\xd7</span></button>' +
+    '<div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">' +
+      '<div class="md:col-span-7">' +
+        '<select name="es_items[' + idx + '][variantId]" onchange="updateEditPrice(this,' + idx + ')" ' +
+          'class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 focus:outline-none">' +
+          optHtml +
+        '</select>' +
+      '</div>' +
+      '<div class="md:col-span-5 flex items-center justify-between gap-2">' +
+        '<div class="flex items-center gap-2">' +
+          '<span class="text-xs text-gray-400">Qty:</span>' +
+          '<input type="number" name="es_items[' + idx + '][quantity]" value="' + (presetQty || 1) + '" min="1" ' +
+            'oninput="updateEditPrice(this.closest(\'.es-item-row\').querySelector(\'select\'),' + idx + ')" ' +
+            'class="w-16 border-gray-300 rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-teal-400 focus:outline-none" />' +
+        '</div>' +
+        '<div class="text-right">' +
+          '<input type="hidden" name="es_items[' + idx + '][price]" value="' + (presetPrice || '') + '" />' +
+          '<span class="text-sm font-bold text-teal-600 es-subtotal-display">Rp 0</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  container.appendChild(div);
+
+  // Pre-select variant and price after inserting into DOM
+  if (presetVariantId) {
+    var sel = div.querySelector('select');
+    sel.value = presetVariantId;
+    var opt = sel.options[sel.selectedIndex];
+    var price = presetPrice || (parseFloat(opt && opt.dataset.price) || 0);
+    div.querySelector('[name="es_items[' + idx + '][price]"]').value = price;
+    var qty = parseInt(presetQty) || 1;
+    div.querySelector('.es-subtotal-display').textContent = 'Rp ' + (price * qty).toLocaleString('id-ID');
+  }
+}
+
+function updateEditPrice(select, index) {
+  if (!select) return;
+  var opt = select.options[select.selectedIndex];
+  var price = parseFloat(opt && opt.dataset.price) || 0;
+  var row = select.closest('.es-item-row');
+  var priceInput = row.querySelector('[name="es_items[' + index + '][price]"]');
+  if (priceInput) priceInput.value = price;
+  var qtyInput = row.querySelector('[type=number]');
+  var qty = parseInt(qtyInput.value) || 1;
+  row.querySelector('.es-subtotal-display').textContent = 'Rp ' + (price * qty).toLocaleString('id-ID');
+}
+
+// ── Customer searchable dropdown ─────────────────────────────────────────────
+function openCustomerDropdown() {
+  document.getElementById('customer-list').classList.remove('hidden');
+}
+function closeCustomerDropdown() {
+  document.getElementById('customer-list').classList.add('hidden');
+}
+function selectCustomer(id, type, label) {
+  document.getElementById('sel-member-id').value = (type === 'member') ? id : '';
+  document.getElementById('sel-nonmember-id').value = (type === 'nonmember') ? id : '';
+  document.getElementById('customer-search').value = (type === 'none') ? '' : label;
+  document.getElementById('customer-clear-btn').classList.toggle('hidden', type === 'none');
+  closeCustomerDropdown();
+  filterCustomers(''); // reset filter display
+}
+function clearCustomerSelection() {
+  selectCustomer('', 'none', '');
+  document.getElementById('customer-search').value = '';
+  document.getElementById('customer-clear-btn').classList.add('hidden');
+}
+function filterCustomers(q) {
+  const list = document.getElementById('customer-list');
+  list.classList.remove('hidden');
+  const opts = list.querySelectorAll('.customer-option');
+  const lq = q.toLowerCase();
+  opts.forEach(function(opt) {
+    const name = (opt.dataset.name || '').toLowerCase();
+    opt.style.display = name.includes(lq) ? '' : 'none';
+  });
+}
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('customer-dropdown-wrap');
+  if (wrap && !wrap.contains(e.target)) closeCustomerDropdown();
+});
+// Reset dropdown when new-sale modal opens
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-modal-open="new-sale-modal"]').forEach(function(btn) {
+    btn.addEventListener('click', function() { clearCustomerSelection(); });
+  });
+});
+let itemCount = 1;
+
+function updatePrice(select, index) {
+  if (!select) return;
+  const opt = select.options[select.selectedIndex];
+  const price = parseFloat(opt.dataset.price) || 0;
+  const row = select.closest('.sale-item-row');
+  
+  // Set hidden price field
+  const priceInput = row.querySelector(`[name="items[${index}][price]"]`);
+  if (priceInput) priceInput.value = price;
+  
+  // Get quantity
+  const qtyInput = row.querySelector('[type=number]');
+  const qty = parseInt(qtyInput.value) || 1;
+  
+  // Update Display
+  const display = row.querySelector('.subtotal-display');
+  display.textContent = 'Rp ' + (price * qty).toLocaleString('id-ID');
+}
+
+function addItem() {
+  const container = document.getElementById('sale-items');
+  const index = itemCount++;
+  const div = document.createElement('div');
+  div.className = 'sale-item-row bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative animate-in fade-in slide-in-from-top-2 duration-200';
+  
+  // Get the options from the first select to clone them
+  const firstSelect = document.querySelector('[name="items[0][variantId]"]');
+  const optionsHtml = firstSelect ? firstSelect.innerHTML : '<option value="">-- Pilih produk --</option>';
+
+  div.innerHTML = `
+    <button type="button" onclick="this.closest('.sale-item-row').remove()" 
+      class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md hover:bg-red-600 z-10">
+      <span class="text-xs">×</span>
+    </button>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+      <div class="md:col-span-7">
+        <select name="items[${index}][variantId]" onchange="updatePrice(this, ${index})"
+          class="w-full border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 focus:outline-none">
+          ${optionsHtml}
+        </select>
+      </div>
+      <div class="md:col-span-5 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-400">Qty:</span>
+          <input type="number" name="items[${index}][quantity]" value="1" min="1" 
+            oninput="updatePrice(this.closest('.sale-item-row').querySelector('select'), ${index})"
+            class="w-16 border-gray-300 rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-teal-400 focus:outline-none" />
+        </div>
+        <div class="text-right">
+          <input type="hidden" name="items[${index}][price]" value="" />
+          <span class="text-sm font-bold text-teal-600 subtotal-display">Rp 0</span>
+        </div>
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+}
+</script>

@@ -1,0 +1,346 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Warung-Ku  — app.css
+   Shared design system. Imported by both admin.html and base.html.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+/* ─── Design tokens ────────────────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --teal-600: #028697;
+  --teal-500: #17a8bb;
+  --teal-400: #1ecbe1;
+  --teal-100: #e0f9fc;
+  --teal-50:  #f0fdfe;
+
+  /* Status */
+  --green-600: #16a34a;
+  --green-100: #dcfce7;
+  --yellow-600: #d97706;
+  --yellow-100: #fef3c7;
+  --red-500:   #ef4444;
+  --red-100:   #fee2e2;
+
+  /* Neutrals */
+  --gray-800: #1f2937;
+  --gray-700: #374151;
+  --gray-600: #4b5563;
+  --gray-400: #9ca3af;
+  --gray-200: #e5e7eb;
+  --gray-100: #f3f4f6;
+  --gray-50:  #f9fafb;
+
+  /* Radii */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,.18), 0 8px 24px rgba(0,0,0,.08);
+}
+
+/* ─── Base reset ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle custom scrollbar */
+::-webkit-scrollbar         { width: 5px; height: 5px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: var(--gray-200); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+/* ─── Sidebar nav ──────────────────────────────────────────────────────── */
+.nav-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: var(--r-sm);
+  font-size: 14px; color: var(--gray-600);
+  transition: background .15s, color .15s;
+  text-decoration: none;
+}
+.nav-link:hover  { background: var(--teal-100); color: var(--teal-600); }
+.nav-link.active { background: var(--teal-100); color: var(--teal-600); font-weight: 600; }
+
+.nav-section {
+  font-size: 11px; font-weight: 600; color: var(--gray-400);
+  padding: 4px 12px; margin-top: 8px;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+
+/* ─── Buttons ──────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--r-md);
+  font-size: 14px; font-weight: 500; line-height: 1;
+  border: none; cursor: pointer;
+  transition: background .15s, box-shadow .15s, transform .1s;
+  text-decoration: none; white-space: nowrap;
+  font-family: inherit;
+}
+.btn:active { transform: scale(.97); }
+
+.btn-primary  { background: var(--teal-600); color: #fff; box-shadow: 0 1px 4px rgba(2,134,151,.3); }
+.btn-primary:hover  { background: var(--teal-500); }
+
+.btn-secondary { background: var(--gray-100); color: var(--gray-800); }
+.btn-secondary:hover { background: var(--gray-200); }
+
+.btn-danger    { background: var(--red-100); color: var(--red-500); }
+.btn-danger:hover  { background: #fecaca; }
+
+.btn-outline   { background: transparent; color: var(--gray-600); border: 1.5px solid var(--gray-200); }
+.btn-outline:hover { background: var(--gray-50); }
+
+.btn-sm  { padding: 5px 12px; font-size: 12px; border-radius: var(--r-sm); }
+.btn-icon { padding: 7px; border-radius: var(--r-sm); }
+
+/* ─── Form controls ────────────────────────────────────────────────────── */
+.wk-input, .wk-select, .wk-textarea {
+  width: 100%;
+  border: 1.5px solid var(--gray-200); border-radius: var(--r-md);
+  padding: 9px 12px; font-size: 14px;
+  color: var(--gray-800); background: #fff;
+  font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+  outline: none;
+}
+.wk-input:focus, .wk-select:focus, .wk-textarea:focus {
+  border-color: var(--teal-400);
+  box-shadow: 0 0 0 3px rgba(30,203,225,.12);
+}
+.wk-input::placeholder { color: var(--gray-400); }
+.wk-label {
+  display: block; font-size: 12px; font-weight: 500;
+  color: var(--gray-600); margin-bottom: 5px;
+}
+
+/* ─── Status badges ────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 500; line-height: 1.7;
+}
+.badge-green  { background: var(--green-100); color: var(--green-600); }
+.badge-yellow { background: var(--yellow-100); color: var(--yellow-600); }
+.badge-red    { background: var(--red-100); color: var(--red-500); }
+.badge-gray   { background: var(--gray-100); color: var(--gray-600); }
+.badge-teal   { background: var(--teal-100); color: var(--teal-600); }
+
+/* ─── Cards ────────────────────────────────────────────────────────────── */
+.card {
+  background: #fff; border-radius: var(--r-lg);
+  border: 1px solid var(--gray-100);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Tables ───────────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; border-radius: var(--r-lg); border: 1px solid var(--gray-100); }
+.wk-table   { width: 100%; border-collapse: collapse; font-size: 14px; }
+.wk-table thead tr { background: var(--gray-50); border-bottom: 1px solid var(--gray-100); }
+.wk-table th {
+  padding: 11px 16px; text-align: left;
+  font-size: 11px; font-weight: 600; color: var(--gray-400);
+  text-transform: uppercase; letter-spacing: .05em; white-space: nowrap;
+}
+.wk-table td {
+  padding: 12px 16px; color: var(--gray-800);
+  border-bottom: 1px solid var(--gray-50);
+}
+.wk-table tbody tr:last-child td  { border-bottom: none; }
+.wk-table tbody tr { transition: background .1s; }
+.wk-table tbody tr:hover { background: var(--gray-50); }
+
+/* ─── Page header ──────────────────────────────────────────────────────── */
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-title { font-size: 20px; font-weight: 700; color: var(--gray-800); }
+
+/* ─── Modal overlay + box ──────────────────────────────────────────────── */
+/*
+  Usage:
+    <div id="my-modal" class="wk-modal-overlay" style="display:none">
+      <div class="wk-modal-box">
+        <div class="wk-modal-header">
+          <h3 class="wk-modal-title">Title</h3>
+          <button class="wk-modal-close" data-modal-close="my-modal">…</button>
+        </div>
+        <div class="wk-modal-body">…</div>
+        <div class="wk-modal-footer">…</div>
+      </div>
+    </div>
+
+  JS: openModal('my-modal') / closeModal('my-modal')
+  Also works with [data-modal-open="my-modal"] on any button.
+*/
+.wk-modal-overlay {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; z-index: 50;
+  background: rgba(0,0,0,0);
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s ease, background .2s ease;
+}
+.wk-modal-overlay.wk-modal-open {
+  opacity: 1; pointer-events: auto;
+  background: rgba(0,0,0,.45);
+}
+/* Scrollable tall modals */
+.wk-modal-overlay.wk-modal-scroll {
+  align-items: flex-start;
+  overflow-y: auto; padding: 32px 16px;
+}
+
+.wk-modal-box {
+  background: #fff; border-radius: var(--r-xl);
+  width: 100%; max-width: 440px;
+  box-shadow: var(--shadow-xl);
+  opacity: 0; transform: scale(.95) translateY(10px);
+  transition: opacity .22s ease, transform .22s cubic-bezier(.34,1.4,.64,1);
+  max-height: 90vh; overflow-y: auto;
+}
+.wk-modal-overlay.wk-modal-open .wk-modal-box {
+  opacity: 1; transform: scale(1) translateY(0);
+}
+.wk-modal-box-lg { max-width: 640px; }
+.wk-modal-box-sm { max-width: 360px; }
+
+.wk-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 0;
+}
+.wk-modal-title  { font-size: 17px; font-weight: 700; color: var(--gray-800); }
+.wk-modal-close  {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  background: none; border: none; cursor: pointer;
+  color: var(--gray-400); transition: all .15s;
+}
+.wk-modal-close:hover { background: var(--gray-100); color: var(--gray-700); }
+.wk-modal-body   { padding: 20px 24px; }
+.wk-modal-footer { padding: 0 24px 20px; display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ─── Custom confirm dialog ────────────────────────────────────────────── */
+#wk-confirm-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: rgba(0,0,0,.5);
+  opacity: 0; pointer-events: none;
+  transition: opacity .18s ease;
+}
+#wk-confirm-overlay.open { opacity: 1; pointer-events: auto; }
+
+#wk-confirm-box {
+  background: #fff; border-radius: var(--r-xl);
+  width: 100%; max-width: 340px; padding: 24px;
+  box-shadow: var(--shadow-xl);
+  opacity: 0; transform: scale(.95) translateY(8px);
+  transition: opacity .2s ease, transform .22s cubic-bezier(.34,1.3,.64,1);
+}
+#wk-confirm-overlay.open #wk-confirm-box { opacity: 1; transform: scale(1) translateY(0); }
+
+#wk-confirm-icon {
+  width: 44px; height: 44px; border-radius: var(--r-md);
+  background: var(--red-100); color: var(--red-500);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+#wk-confirm-title { font-size: 16px; font-weight: 700; color: var(--gray-800); margin: 0 0 6px; }
+#wk-confirm-msg   { font-size: 14px; color: var(--gray-600); line-height: 1.55; margin: 0 0 20px; }
+#wk-confirm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ─── Toast notifications ──────────────────────────────────────────────── */
+#wk-toast-container {
+  position: fixed; top: 20px; right: 20px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+}
+.wk-toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: var(--r-md);
+  background: #fff; box-shadow: var(--shadow-lg);
+  border-left: 3px solid transparent;
+  font-size: 14px; font-weight: 500; color: var(--gray-800);
+  pointer-events: auto;
+  min-width: 240px; max-width: 340px;
+  transform: translateX(120%); opacity: 0;
+  transition: transform .28s cubic-bezier(.34,1.3,.64,1), opacity .25s;
+}
+.wk-toast.show { transform: translateX(0); opacity: 1; }
+.wk-toast.hide { transform: translateX(120%); opacity: 0; transition-duration: .2s; }
+.wk-toast-icon { flex-shrink: 0; }
+.wk-toast.toast-success { border-color: var(--green-600); }
+.wk-toast.toast-success .wk-toast-icon { color: var(--green-600); }
+.wk-toast.toast-error   { border-color: var(--red-500); }
+.wk-toast.toast-error   .wk-toast-icon { color: var(--red-500); }
+.wk-toast.toast-warning { border-color: var(--yellow-600); }
+.wk-toast.toast-warning .wk-toast-icon { color: var(--yellow-600); }
+.wk-toast.toast-info    { border-color: var(--teal-500); }
+.wk-toast.toast-info    .wk-toast-icon { color: var(--teal-500); }
+
+/* ─── Mobile bottom nav ────────────────────────────────────────────────── */
+.mob-tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; flex: 1; padding: 10px 4px 14px;
+  font-size: 10px; font-weight: 500; color: var(--gray-400);
+  background: none; border: none; cursor: pointer;
+  transition: color .15s; text-decoration: none;
+}
+.mob-tab svg   { width: 22px; height: 22px; }
+.mob-tab.active { color: var(--teal-600); }
+.mob-tab:active { opacity: .7; }
+
+.mob-popup {
+  position: fixed; bottom: 65px; left: 12px; right: 12px; z-index: 50;
+  pointer-events: none; opacity: 0; transform: translateY(10px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.mob-popup.open { pointer-events: auto; opacity: 1; transform: translateY(0); }
+
+.mob-popup-inner {
+  background: #fff; border-radius: var(--r-lg); padding: 8px;
+  box-shadow: 0 -2px 32px rgba(0,0,0,.13), 0 0 0 1px rgba(0,0,0,.04);
+}
+.mob-popup-section {
+  font-size: 10px; font-weight: 600; color: var(--gray-400);
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: 4px 12px 6px;
+}
+.mob-popup-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 12px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; color: var(--gray-800);
+  text-decoration: none; transition: background .12s;
+  width: 100%; background: none; border: none; cursor: pointer; text-align: left;
+  font-family: inherit;
+}
+.mob-popup-link:hover, .mob-popup-link:active { background: var(--gray-100); }
+.mob-popup-link.active { background: var(--teal-100); color: var(--teal-600); }
+
+/* ─── Spinner ──────────────────────────────────────────────────────────── */
+.wk-spinner {
+  width: 20px; height: 20px;
+  border: 2.5px solid var(--gray-200);
+  border-top-color: var(--teal-500);
+  border-radius: 50%;
+  animation: wk-spin .6s linear infinite;
+  display: inline-block;
+}
+@keyframes wk-spin { to { transform: rotate(360deg); } }
+
+/* ─── Auth page blob animation (base.html) ─────────────────────────────── */
+.animate-blob { animation: blob 7s infinite; }
+@keyframes blob {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  33%       { transform: translate(30px,-50px) scale(1.1); }
+  66%       { transform: translate(-20px,20px) scale(0.9); }
+}

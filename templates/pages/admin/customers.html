@@ -1,0 +1,322 @@
+<!-- Customers page – unified table with member badge + edit modals -->
+<div>
+  <h1 class="text-xl font-bold text-gray-800 mb-6">Pelanggan</h1>
+
+  <!-- Action bar -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div class="flex gap-2">
+      <button data-modal-open="add-member-modal"
+        class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
+        + Tambah Member
+      </button>
+      <button data-modal-open="add-nonmember-modal"
+        class="border border-teal-600 text-teal-600 hover:bg-teal-50 px-4 py-2 rounded-xl text-sm font-medium transition">
+        + Tambah Pelanggan
+      </button>
+    </div>
+    <!-- Search filter -->
+    <input type="text" id="customer-filter" placeholder="Cari nama / telepon..."
+      oninput="filterCustomerTable(this.value)"
+      class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 focus:outline-none w-56" />
+  </div>
+
+  <!-- Unified table -->
+  <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+    <div class="overflow-x-auto overflow-y-auto max-h-[520px]">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b sticky top-0 z-10">
+          <tr>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Nama</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Telepon</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Email / Alamat</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Tipe</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Poin</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="customers-tbody" class="divide-y">
+          {{range .Members}}
+          <tr class="hover:bg-gray-50 customer-row" data-search="{{.Name}} {{.Phone}}">
+            <td class="px-4 py-3 font-medium whitespace-nowrap">{{.Name}}</td>
+            <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{.Phone}}</td>
+            <td class="px-4 py-3 text-gray-500 text-xs">{{if .Email}}{{deref .Email}}{{else}}-{{end}}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-700">Member</span>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span class="font-medium text-teal-600">{{.Points}}</span>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <button type="button"
+                data-id="{{.ID}}"
+                data-name="{{.Name}}"
+                data-phone="{{.Phone}}"
+                data-email="{{if .Email}}{{deref .Email}}{{end}}"
+                data-address="{{if .Address}}{{deref .Address}}{{end}}"
+                data-birthday='{{if .Birthday}}{{.Birthday.Format "2006-01-02"}}{{end}}'
+                onclick="openEditMemberFromBtn(this)"
+                class="text-teal-600 hover:text-teal-800 text-xs font-medium px-2 py-1 rounded hover:bg-teal-50 transition">
+                Edit
+              </button>
+            </td>
+          </tr>
+          {{end}}
+          {{range .NonMembers}}
+          <tr class="hover:bg-gray-50 customer-row" data-search="{{.Name}} {{.Phone}}">
+            <td class="px-4 py-3 font-medium whitespace-nowrap">{{.Name}}</td>
+            <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{.Phone}}</td>
+            <td class="px-4 py-3 text-gray-500 text-xs">{{if .Address}}{{deref .Address}}{{else}}-{{end}}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Umum</span>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-gray-300">—</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <button type="button"
+                data-id="{{.ID}}"
+                data-name="{{.Name}}"
+                data-phone="{{.Phone}}"
+                data-address="{{if .Address}}{{deref .Address}}{{end}}"
+                onclick="openEditNonMemberFromBtn(this)"
+                class="text-teal-600 hover:text-teal-800 text-xs font-medium px-2 py-1 rounded hover:bg-teal-50 transition">
+                Edit
+              </button>
+            </td>
+          </tr>
+          {{end}}
+          {{if and (not .Members) (not .NonMembers)}}
+          <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Belum ada data pelanggan</td></tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    <div id="customers-pagination"></div>
+  </div>
+</div>
+
+<!-- ── Add Member Modal ─────────────────────────────────────────────────── -->
+<div id="add-member-modal" class="wk-modal-overlay" style="display:none">
+  <div class="wk-modal-box">
+    <div class="wk-modal-header">
+      <h3 class="wk-modal-title">Tambah Member</h3>
+      <button class="wk-modal-close" data-modal-close="add-member-modal">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="wk-modal-body">
+      <form action="/admin/sales-customers/customers/member" method="POST" class="space-y-3">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama *</label>
+          <input type="text" name="name" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Telepon *</label>
+          <input type="tel" name="phone" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" name="email" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
+          <input type="text" name="address" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
+          <input type="date" name="birthday" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+          <input type="password" name="password" minlength="6" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white py-2 rounded-xl font-medium transition">Simpan</button>
+          <button type="button" data-modal-close="add-member-modal"
+            class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-xl font-medium hover:bg-gray-50 transition">Batal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add Non-member Modal ─────────────────────────────────────────────── -->
+<div id="add-nonmember-modal" class="wk-modal-overlay" style="display:none">
+  <div class="wk-modal-box">
+    <div class="wk-modal-header">
+      <h3 class="wk-modal-title">Tambah Pelanggan Umum</h3>
+      <button class="wk-modal-close" data-modal-close="add-nonmember-modal">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="wk-modal-body">
+      <form action="/admin/sales-customers/customers/non-member" method="POST" class="space-y-3">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama *</label>
+          <input type="text" name="name" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Telepon *</label>
+          <input type="tel" name="phone" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
+          <input type="text" name="address" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white py-2 rounded-xl font-medium transition">Simpan</button>
+          <button type="button" data-modal-close="add-nonmember-modal"
+            class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-xl font-medium hover:bg-gray-50 transition">Batal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit Member Modal ────────────────────────────────────────────────── -->
+<div id="edit-member-modal" class="wk-modal-overlay" style="display:none">
+  <div class="wk-modal-box">
+    <div class="wk-modal-header">
+      <h3 class="wk-modal-title">Edit Member</h3>
+      <button class="wk-modal-close" data-modal-close="edit-member-modal">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="wk-modal-body">
+      <form id="edit-member-form" action="" method="POST" class="space-y-3">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama *</label>
+          <input type="text" name="name" id="em-name" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Telepon *</label>
+          <input type="tel" name="phone" id="em-phone" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" name="email" id="em-email" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+          <input type="text" name="address" id="em-address" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
+          <input type="date" name="birthday" id="em-birthday" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white py-2 rounded-xl font-medium transition">Simpan</button>
+          <button type="button" data-modal-close="edit-member-modal"
+            class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-xl font-medium hover:bg-gray-50 transition">Batal</button>
+        </div>
+      </form>
+      <!-- Hapus (inside modal) -->
+      <div class="mt-3 pt-3 border-t border-gray-100">
+        <form id="delete-member-form" action="" method="POST"
+          data-confirm="Hapus member ini? Tindakan ini tidak bisa dibatalkan.">
+          <button type="submit"
+            class="w-full text-red-500 hover:bg-red-50 border border-red-200 py-2 rounded-xl text-sm font-medium transition">
+            Hapus Member
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit Non-member Modal ────────────────────────────────────────────── -->
+<div id="edit-nonmember-modal" class="wk-modal-overlay" style="display:none">
+  <div class="wk-modal-box">
+    <div class="wk-modal-header">
+      <h3 class="wk-modal-title">Edit Pelanggan Umum</h3>
+      <button class="wk-modal-close" data-modal-close="edit-nonmember-modal">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="wk-modal-body">
+      <form id="edit-nonmember-form" action="" method="POST" class="space-y-3">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama *</label>
+          <input type="text" name="name" id="enm-name" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Telepon *</label>
+          <input type="tel" name="phone" id="enm-phone" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+          <input type="text" name="address" id="enm-address" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 focus:outline-none" /></div>
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white py-2 rounded-xl font-medium transition">Simpan</button>
+          <button type="button" data-modal-close="edit-nonmember-modal"
+            class="flex-1 border border-gray-200 text-gray-700 py-2 rounded-xl font-medium hover:bg-gray-50 transition">Batal</button>
+        </div>
+      </form>
+      <!-- Hapus (inside modal) -->
+      <div class="mt-3 pt-3 border-t border-gray-100">
+        <form id="delete-nonmember-form" action="" method="POST"
+          data-confirm="Hapus pelanggan ini? Tindakan ini tidak bisa dibatalkan.">
+          <button type="submit"
+            class="w-full text-red-500 hover:bg-red-50 border border-red-200 py-2 rounded-xl text-sm font-medium transition">
+            Hapus Pelanggan
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Pagination ───────────────────────────────────────────────────────────────
+var _pg = {};
+function paginate(tbodyId, pgId, size) {
+  var tbody = document.getElementById(tbodyId);
+  var pgEl = document.getElementById(pgId);
+  if (!tbody) return;
+  var rows = Array.from(tbody.querySelectorAll('tr.customer-row'));
+  _pg[tbodyId] = { rows: rows, page: 1, size: size || 10, el: pgEl };
+  _renderPg(tbodyId);
+}
+function _goPage(id, p) { _pg[id].page = p; _renderPg(id); }
+function _renderPg(id) {
+  var s = _pg[id]; 
+  var visible = s.rows.filter(function(r){ return r.style.display !== 'none'; });
+  var total = Math.ceil(visible.length / s.size);
+  if (s.page > total && total > 0) s.page = 1;
+  visible.forEach(function(r,i){ r.style.display = (i>=(s.page-1)*s.size && i<s.page*s.size)?'':'none'; });
+  if (!s.el) return;
+  if (visible.length === 0) { s.el.innerHTML=''; return; }
+  var from=(s.page-1)*s.size+1, to=Math.min(s.page*s.size,visible.length);
+  var h='<div class="flex items-center justify-between px-4 py-3 border-t text-xs text-gray-500">';
+  h+='<span>'+from+'–'+to+' dari '+visible.length+' data</span><div class="flex gap-1">';
+  if(s.page>1) h+='<button onclick="_goPage(\''+id+'\','+(s.page-1)+')" class="px-2.5 py-1 rounded border hover:bg-gray-50">‹</button>';
+  var st=Math.max(1,s.page-2), en=Math.min(total,st+4);
+  for(var p=st;p<=en;p++){
+    var a=p===s.page?'bg-teal-600 text-white border-teal-600':'hover:bg-gray-50 text-gray-600';
+    h+='<button onclick="_goPage(\''+id+'\','+p+')" class="px-2.5 py-1 rounded border '+a+'">'+p+'</button>';
+  }
+  if(s.page<total) h+='<button onclick="_goPage(\''+id+'\','+(s.page+1)+')" class="px-2.5 py-1 rounded border hover:bg-gray-50">›</button>';
+  h+='</div></div>';
+  s.el.innerHTML=h;
+}
+
+// ── Table search filter ──────────────────────────────────────────────────────
+function filterCustomerTable(q) {
+  var lq = q.toLowerCase();
+  document.querySelectorAll('#customers-tbody .customer-row').forEach(function(row) {
+    var text = (row.dataset.search || '').toLowerCase();
+    row.style.display = text.includes(lq) ? '' : 'none';
+  });
+  _renderPg('customers-tbody');
+}
+
+// ── Edit Member modal ────────────────────────────────────────────────────────
+function openEditMemberFromBtn(btn) {
+  openEditMember(btn.dataset.id, btn.dataset.name, btn.dataset.phone,
+    btn.dataset.email, btn.dataset.address, btn.dataset.birthday);
+}
+function openEditNonMemberFromBtn(btn) {
+  openEditNonMember(btn.dataset.id, btn.dataset.name, btn.dataset.phone, btn.dataset.address);
+}
+function openEditMember(id, name, phone, email, address, birthday) {
+  document.getElementById('edit-member-form').action =
+    '/admin/sales-customers/customers/member/' + id + '/update';
+  document.getElementById('delete-member-form').action =
+    '/admin/sales-customers/customers/member/' + id + '/delete';
+  document.getElementById('em-name').value = name;
+  document.getElementById('em-phone').value = phone;
+  document.getElementById('em-email').value = email;
+  document.getElementById('em-address').value = address;
+  document.getElementById('em-birthday').value = birthday;
+  openModal('edit-member-modal');
+}
+
+// ── Edit Non-member modal ────────────────────────────────────────────────────
+function openEditNonMember(id, name, phone, address) {
+  document.getElementById('edit-nonmember-form').action =
+    '/admin/sales-customers/customers/non-member/' + id + '/update';
+  document.getElementById('delete-nonmember-form').action =
+    '/admin/sales-customers/customers/non-member/' + id + '/delete';
+  document.getElementById('enm-name').value = name;
+  document.getElementById('enm-phone').value = phone;
+  document.getElementById('enm-address').value = address;
+  openModal('edit-nonmember-modal');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  paginate('customers-tbody', 'customers-pagination', 10);
+});
+</script>

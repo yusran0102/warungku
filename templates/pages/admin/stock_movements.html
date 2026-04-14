@@ -1,0 +1,84 @@
+<!-- Stock movements history page -->
+<div>
+  <div class="flex items-center gap-4 mb-6">
+    <a href="/admin/inventory/stock" class="text-gray-400 hover:text-gray-600">← Kembali</a>
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800">Riwayat Stok</h2>
+      <p class="text-gray-500 text-sm">{{.Variant.Product.Name}} – {{.Variant.Name}}</p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+    <div class="overflow-x-auto overflow-y-auto max-h-[520px]">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b sticky top-0 z-10">
+          <tr>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Tipe</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Jumlah</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Keterangan</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Tanggal</th>
+          </tr>
+        </thead>
+        <tbody id="movements-tbody" class="divide-y">
+          {{range .Movements}}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded-full text-xs
+                {{if eq (str .Type) "IN"}}bg-green-100 text-green-700
+                {{else if eq (str .Type) "OUT"}}bg-red-100 text-red-700
+                {{else}}bg-yellow-100 text-yellow-700{{end}}">
+                {{.Type}}
+              </span>
+            </td>
+            <td class="px-4 py-3 font-medium whitespace-nowrap
+              {{if eq (str .Type) "IN"}}text-green-600{{else if eq (str .Type) "OUT"}}text-red-600{{else}}text-yellow-600{{end}}">
+              {{if eq (str .Type) "OUT"}}-{{else}}+{{end}}{{.Quantity}}
+            </td>
+            <td class="px-4 py-3 text-gray-500">{{if .Notes}}{{deref .Notes}}{{else}}-{{end}}</td>
+            <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{{.CreatedAt.Format "02 Jan 2006, 15:04"}}</td>
+          </tr>
+          {{else}}
+          <tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">Belum ada riwayat</td></tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    <div id="movements-pagination"></div>
+  </div>
+</div>
+
+<script>
+var _pg = {};
+function paginate(tbodyId, pgId, size) {
+  var tbody = document.getElementById(tbodyId);
+  var pgEl  = document.getElementById(pgId);
+  if (!tbody) return;
+  var rows = Array.from(tbody.querySelectorAll('tr')).filter(function(r){ return !r.querySelector('td[colspan]'); });
+  _pg[tbodyId] = { rows: rows, page: 1, size: size || 10, el: pgEl };
+  _renderPg(tbodyId);
+}
+function _goPage(id, p) { _pg[id].page = p; _renderPg(id); }
+function _renderPg(id) {
+  var s = _pg[id], total = Math.ceil(s.rows.length / s.size);
+  s.rows.forEach(function(r, i) {
+    r.style.display = (i >= (s.page-1)*s.size && i < s.page*s.size) ? '' : 'none';
+  });
+  if (!s.el) return;
+  if (s.rows.length === 0) { s.el.innerHTML = ''; return; }
+  var from = (s.page-1)*s.size+1, to = Math.min(s.page*s.size, s.rows.length);
+  var h = '<div class="flex items-center justify-between px-4 py-3 border-t text-xs text-gray-500">';
+  h += '<span>' + from + '–' + to + ' dari ' + s.rows.length + ' data</span><div class="flex gap-1">';
+  if (s.page > 1) h += '<button onclick="_goPage(\'' + id + '\',' + (s.page-1) + ')" class="px-2.5 py-1 rounded border hover:bg-gray-50">‹</button>';
+  var st = Math.max(1, s.page-2), en = Math.min(total, st+4);
+  for (var p = st; p <= en; p++) {
+    var a = p === s.page ? 'bg-teal-600 text-white border-teal-600' : 'hover:bg-gray-50 text-gray-600';
+    h += '<button onclick="_goPage(\'' + id + '\',' + p + ')" class="px-2.5 py-1 rounded border ' + a + '">' + p + '</button>';
+  }
+  if (s.page < total) h += '<button onclick="_goPage(\'' + id + '\',' + (s.page+1) + ')" class="px-2.5 py-1 rounded border hover:bg-gray-50">›</button>';
+  h += '</div></div>';
+  s.el.innerHTML = h;
+}
+document.addEventListener('DOMContentLoaded', function() {
+  paginate('movements-tbody', 'movements-pagination', 15);
+});
+</script>

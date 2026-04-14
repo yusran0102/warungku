@@ -1,0 +1,91 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+.env.production
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+warungku
+/bin/
+/pkg/
+
+# Go test files
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Dependency directories
+vendor/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS-specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+db/*.db
+db/*.sqlite
+db/*.sqlite3
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Docker volumes and data
+docker-data/
+postgres-data/
+mysql-data/
+
+# Build output
+dist/
+build/
+
+# Air live reload (if using)
+tmp/
+.air.toml
+
+# Compiled static assets (if generated)
+# static/dist/
+# static/build/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar

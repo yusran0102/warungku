@@ -1,0 +1,68 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-100 via-teal-50 to-teal-100 p-4 relative overflow-hidden">
+  <div class="absolute -top-40 -right-40 w-80 h-80 bg-teal-400 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob"></div>
+  <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-500 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob" style="animation-delay:2s"></div>
+
+  <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-sm p-8 relative z-10">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 rounded-2xl bg-teal-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <span class="text-3xl">🍳</span>
+      </div>
+      <h1 class="text-2xl font-bold text-teal-600">Warung-Ku</h1>
+      <p class="text-gray-500 text-sm mt-1">Login untuk akses ke beranda</p>
+    </div>
+
+    {{if .Error}}
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-5 flex items-center gap-2">
+      <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+      {{.Error}}
+    </div>
+    {{end}}
+
+    <form action="/login" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1.5 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Email atau No. WhatsApp
+        </label>
+        <input type="text" name="identifier" required placeholder="you@example.com atau 08123456789"
+          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1.5 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          Password
+        </label>
+        <div class="relative">
+          <input type="password" name="password" id="pw-login" required placeholder="••••••••"
+            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition" />
+          <button type="button" onclick="togglePw('pw-login',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit"
+        class="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold py-2.5 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mt-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+        Masuk
+      </button>
+    </form>
+
+    <div class="relative my-5">
+      <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+      <div class="relative flex justify-center"><span class="px-3 bg-white text-xs text-gray-400">atau</span></div>
+    </div>
+
+    <p class="text-center text-sm text-gray-500">
+      Belum punya akun?
+      <a href="/register" class="text-teal-600 hover:underline font-medium">Daftar Member</a>
+    </p>
+  </div>
+</div>
+<script>
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+</script>
