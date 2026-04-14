@@ -1,4 +1,4 @@
-module github.com/ysrn87/warung-ku
+module github.com/yusran0102/warungku
 
 go 1.22
 

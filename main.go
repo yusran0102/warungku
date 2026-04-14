@@ -13,11 +13,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/template/html/v2"
 	"github.com/joho/godotenv"
-	"github.com/ysrn87/warung-ku/internal/database"
-	"github.com/ysrn87/warung-ku/internal/handlers"
-	"github.com/ysrn87/warung-ku/internal/middleware"
-	"github.com/ysrn87/warung-ku/internal/models"
-	"github.com/ysrn87/warung-ku/internal/utils"
+	"github.com/yusran0102/warungku/internal/database"
+	"github.com/yusran0102/warungku/internal/handlers"
+	"github.com/yusran0102/warungku/internal/middleware"
+	"github.com/yusran0102/warungku/internal/models"
+	"github.com/yusran0102/warungku/internal/utils"
 )
 
 func main() {

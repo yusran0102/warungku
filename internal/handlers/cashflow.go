@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/ysrn87/warung-ku/internal/database"
-	"github.com/ysrn87/warung-ku/internal/middleware"
-	"github.com/ysrn87/warung-ku/internal/models"
+	"github.com/yusran0102/warungku/internal/database"
+	"github.com/yusran0102/warungku/internal/middleware"
+	"github.com/yusran0102/warungku/internal/models"
 )
 
 // ShowCashflow renders GET /admin/finance/cashflow

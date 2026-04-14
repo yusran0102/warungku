@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/ysrn87/warung-ku/internal/database"
-	"github.com/ysrn87/warung-ku/internal/middleware"
-	"github.com/ysrn87/warung-ku/internal/models"
-	"github.com/ysrn87/warung-ku/internal/services"
+	"github.com/yusran0102/warungku/internal/database"
+	"github.com/yusran0102/warungku/internal/middleware"
+	"github.com/yusran0102/warungku/internal/models"
+	"github.com/yusran0102/warungku/internal/services"
 )
 
 func ShowSales(c *fiber.Ctx) error {

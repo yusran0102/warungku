@@ -3,8 +3,8 @@ package services
 import (
 	"time"
 
-	"github.com/ysrn87/warung-ku/internal/database"
-	"github.com/ysrn87/warung-ku/internal/models"
+	"github.com/yusran0102/warungku/internal/database"
+	"github.com/yusran0102/warungku/internal/models"
 )
 
 // GetAvailablePoints calculates non-expired points for a user (mirrors getAvailablePoints)
