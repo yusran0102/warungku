@@ -27,7 +27,7 @@ func AdminDashboard(c *fiber.Ctx) error {
 	database.DB.Preload("Product").Where("stock <= low_stock AND is_active = true").Limit(5).Find(&lowStockItems)
 
 	return c.Render("pages/admin/dashboard", fiber.Map{
-		"Title":         "Beranda – Warung-Ku",
+		"Title":         "Beranda – warungku",
 		"ActivePage":    "dashboard",
 		"User":          claims,
 		"TotalVariants": totalVariants,

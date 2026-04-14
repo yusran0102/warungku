@@ -1,6 +1,6 @@
 -- ============================================================
 -- 000001_init_schema.up.sql
--- Creates the full Warung-Ku schema.
+-- Creates the full warungku schema.
 -- Equivalent to running `prisma db push` on the original app.
 -- ============================================================
 

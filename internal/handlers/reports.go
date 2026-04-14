@@ -58,7 +58,7 @@ func ShowRecap(c *fiber.Ctx) error {
 	}
 
 	return c.Render("pages/admin/recap", fiber.Map{
-		"Title":             "Rekap Penjualan – Warung-Ku",
+		"Title":             "Rekap Penjualan – warungku",
 		"ActivePage":        "recap",
 		"User":              claims,
 		"Rows":              rows,
@@ -97,7 +97,7 @@ func ShowReports(c *fiber.Ctx) error {
 		Order("created_at DESC").Limit(10).Find(&recentSales)
 
 	return c.Render("pages/admin/reports", fiber.Map{
-		"Title":             "Laporan – Warung-Ku",
+		"Title":             "Laporan – warungku",
 		"ActivePage":        "reports",
 		"User":              claims,
 		"TotalIncome":       totalIncome,

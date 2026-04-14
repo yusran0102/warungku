@@ -11,18 +11,20 @@
   </div>
 
   <!-- Search bar -->
-  <form method="GET" class="flex items-center gap-2">
+  <form method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
     <input type="text" name="search" value="{{.Search}}" placeholder="Cari nama atau SKU..."
       class="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400" />
-    <select name="status"
-      class="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
-      <option value="all" {{if eq .Status "all" }}selected{{end}}>Semua</option>
-      <option value="active" {{if eq .Status "active" }}selected{{end}}>Aktif</option>
-      <option value="inactive" {{if eq .Status "inactive" }}selected{{end}}>Nonaktif</option>
-    </select>
-    <button type="submit"
-      class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap">Cari
-    </button>
+    <div class="flex gap-2">
+      <select name="status"
+        class="flex-1 sm:flex-none border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
+        <option value="all" {{if eq .Status "all" }}selected{{end}}>Semua</option>
+        <option value="active" {{if eq .Status "active" }}selected{{end}}>Aktif</option>
+        <option value="inactive" {{if eq .Status "inactive" }}selected{{end}}>Nonaktif</option>
+      </select>
+      <button type="submit"
+        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap">Cari
+      </button>
+    </div>
   </form>
 
 

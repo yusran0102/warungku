@@ -43,7 +43,7 @@ func ShowSales(c *fiber.Ctx) error {
 	conversionRate := services.GetPointsConversionRate()
 
 	return c.Render("pages/admin/sales", fiber.Map{
-		"Title":          "Penjualan – Warung-Ku",
+		"Title":          "Penjualan – warungku",
 		"ActivePage":     "sales",
 		"User":           claims,
 		"Sales":          sales,

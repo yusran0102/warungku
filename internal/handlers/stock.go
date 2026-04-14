@@ -31,7 +31,7 @@ func ShowStock(c *fiber.Ctx) error {
 	}
 
 	return c.Render("pages/admin/stock", fiber.Map{
-		"Title":         "Stok – Warung-Ku",
+		"Title":         "Stok – warungku",
 		"User":          claims,
 		"ActivePage":    "stock",
 		"Variants":      variants,
@@ -74,7 +74,7 @@ func ShowStockMovements(c *fiber.Ctx) error {
 		Find(&movements)
 
 	return c.Render("pages/admin/stock_movements", fiber.Map{
-		"Title":     "Riwayat Stok – Warung-Ku",
+		"Title":     "Riwayat Stok – warungku",
 		"User":      claims,
 		"Variant":   variant,
 		"Movements": movements,

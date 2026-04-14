@@ -32,7 +32,7 @@ func ShowCashflow(c *fiber.Ctx) error {
 	}
 
 	return c.Render("pages/admin/cashflow", fiber.Map{
-		"Title":        "Arus Kas – Warung-Ku",
+		"Title":        "Arus Kas – warungku",
 		"User":         claims,
 		"ActivePage":   "cashflow",
 		"Cashflows":    cashflows,

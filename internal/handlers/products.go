@@ -31,7 +31,7 @@ func ShowProducts(c *fiber.Ctx) error {
 	query.Order("name ASC").Find(&products)
 
 	return c.Render("pages/admin/products", fiber.Map{
-		"Title":      "Produk – Warung-Ku",
+		"Title":      "Produk – warungku",
 		"ActivePage": "products",
 		"Products":   products,
 		"User":       claims,

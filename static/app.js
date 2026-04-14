@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────────
-   Warung-Ku  — app.js
+   warungku  — app.js
    Shared utilities: modal manager, confirm dialog, toast, mobile nav.
    ───────────────────────────────────────────────────────────────────────── */
 
