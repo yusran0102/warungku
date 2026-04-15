@@ -18,7 +18,7 @@ func ShowSettings(c *fiber.Ctx) error {
 	settings := services.GetAllSettings()
 
 	return c.Render("pages/admin/settings_points", fiber.Map{
-		"Title":      "Pengaturan Poin – warungku",
+		"Title":      "Pengaturan Poin – Warung-Ku",
 		"User":       claims,
 		"ActivePage": "settings-points",
 		"Settings":   settings,
@@ -53,7 +53,7 @@ func ShowProfile(c *fiber.Ctx) error {
 	}
 
 	return c.Render("pages/admin/settings_profile", fiber.Map{
-		"Title":      "Profil – warungku",
+		"Title":      "Profil – Warung-Ku",
 		"User":       claims,
 		"ActivePage": "settings-profile",
 		"Admin":      admin,

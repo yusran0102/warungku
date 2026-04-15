@@ -17,7 +17,7 @@ import (
 func ShowLogin(c *fiber.Ctx) error {
 	registered := c.Query("registered") == "1"
 	return c.Render("pages/auth/login", fiber.Map{
-		"Title":      "Login – warungku",
+		"Title":      "Login – Warung-Ku",
 		"Registered": registered,
 	}, "layouts/base")
 }
@@ -25,7 +25,7 @@ func ShowLogin(c *fiber.Ctx) error {
 // ShowRegister renders GET /register
 func ShowRegister(c *fiber.Ctx) error {
 	return c.Render("pages/auth/register", fiber.Map{
-		"Title": "Daftar Member – warungku",
+		"Title": "Daftar Member – Warung-Ku",
 	}, "layouts/base")
 }
 
@@ -36,7 +36,7 @@ func Login(c *fiber.Ctx) error {
 
 	if identifier == "" || password == "" {
 		return c.Render("pages/auth/login", fiber.Map{
-			"Title": "Login – warungku",
+			"Title": "Login – Warung-Ku",
 			"Error": "Email/telepon dan password wajib diisi",
 		}, "layouts/base")
 	}
@@ -48,14 +48,14 @@ func Login(c *fiber.Ctx) error {
 
 	if result.Error != nil {
 		return c.Render("pages/auth/login", fiber.Map{
-			"Title": "Login – warungku",
+			"Title": "Login – Warung-Ku",
 			"Error": "Identitas atau password salah",
 		}, "layouts/base")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return c.Render("pages/auth/login", fiber.Map{
-			"Title": "Login – warungku",
+			"Title": "Login – Warung-Ku",
 			"Error": "Identitas atau password salah",
 		}, "layouts/base")
 	}
@@ -102,7 +102,7 @@ func Register(c *fiber.Ctx) error {
 
 	renderErr := func(msg string) error {
 		return c.Render("pages/auth/register", fiber.Map{
-			"Title": "Daftar – warungku",
+			"Title": "Daftar – Warung-Ku",
 			"Error": msg,
 		}, "layouts/base")
 	}

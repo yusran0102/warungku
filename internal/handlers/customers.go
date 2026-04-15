@@ -24,7 +24,7 @@ func ShowCustomers(c *fiber.Ctx) error {
 	database.DB.Order("created_at DESC").Find(&nonMembers)
 
 	return c.Render("pages/admin/customers", fiber.Map{
-		"Title":      "Pelanggan – warungku",
+		"Title":      "Pelanggan – Warung-Ku",
 		"ActivePage": "customers",
 		"User":       claims,
 		"Members":    members,
